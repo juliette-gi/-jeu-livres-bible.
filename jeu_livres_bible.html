@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu des livres de la Bible</title>
+    <style>
+        body {
+            background-color: #E3F2FD; /* Fond bleu très clair */
+            font-family: Arial, sans-serif;
+            color: #333;
+            padding: 20px;
+            text-align: center;
+        }
+        #pile {
+            margin: 20px;
+            padding: 10px;
+            background-color: #FFFFFF;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            max-width: 1000px;
+            text-align: left;
+            overflow-wrap: break-word;
+        }
+        #message {
+            font-size: 24px;
+            color: green;
+            display: none;
+        }
+        .livre {
+            margin: 5px;
+            font-size: 18px;
+            padding: 5px;
+            background-color: #f0f8ff;
+            border-radius: 4px;
+            display: inline-block;
+            width: 180px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        #pile div {
+            display: inline-block;
+            width: 180px; /* Ajusté pour ajouter une colonne supplémentaire */
+            margin-right: 10px;
+            margin-bottom: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #5C6BC0;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        button:disabled {
+            background-color: #B0BEC5;
+        }
+        input[type="number"] {
+            padding: 5px;
+            font-size: 16px;
+            margin: 10px;
+            width: 50px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Jeu des livres de la Bible</h1>
+    <div id="pile"></div>
+    <div>
+        <input type="number" id="nombreLivres" value="1" min="1" max="73">
+        <button id="ajouterLivre">Ajouter des livres</button>
+    </div>
+    <button id="retirerLivre" disabled>Retirer un livre</button>
+    <div id="message">BRAVO TU AS GAGNE</div>
+    <button id="recommencer" style="display:none;">Recommencer</button>
+
+    <script>
+        const livresBible = ["Genèse", "Exode", "Lévitique", "Nombres", "Deutéronome", "Josué", "Juges", "Ruth", "1 Samuel", "2 Samuel", "1 Rois", "2 Rois", "1 Chroniques", "2 Chroniques", "Esdras", "Néhémie", "Esther", "Job", "Psaumes", "Proverbes", "Ecclésiaste", "Cantique des Cantiques", "Ésaïe", "Jérémie", "Lamentations", "Ézéchiel", "Daniel", "Osée", "Joël", "Amos", "Abdias", "Jonas", "Michée", "Nahum", "Habacuc", "Sophonie", "Aggée", "Zacharie", "Malachie", "Matthieu", "Marc", "Luc", "Jean", "Actes", "Romains", "1 Corinthiens", "2 Corinthiens", "Galates", "Éphésiens", "Philippiens", "Colossiens", "1 Thessaloniciens", "2 Thessaloniciens", "1 Timothée", "2 Timothée", "Tite", "Philémon", "Hébreux", "Jacques", "1 Pierre", "2 Pierre", "1 Jean", "2 Jean", "3 Jean", "Jude", "Apocalypse"];
+        let livresCollectes = [];
+        let totalLivres = 10;
+
+        // Initialiser le jeu avec 10 livres sans doublon
+        function initialiserJeu() {
+            livresCollectes = [];
+            while (livresCollectes.length < totalLivres) {
+                const livre = livresBible[Math.floor(Math.random() * livresBible.length)];
+                if (!livresCollectes.includes(livre)) {
+                    livresCollectes.push(livre);
+                }
+            }
+            afficherLivres();
+            document.getElementById('retirerLivre').disabled = livresCollectes.length === 0;
+        }
+
+        // Fonction pour afficher les livres collectés
+        function afficherLivres() {
+            const pileDiv = document.getElementById('pile');
+            pileDiv.innerHTML = '';
+            livresCollectes.forEach(livre => {
+                const livreDiv = document.createElement('div');
+                livreDiv.classList.add('livre');
+                livreDiv.textContent = livre;
+                pileDiv.appendChild(livreDiv);
+            });
+        }
+
+        // Ajouter un livre à la pile sans doublon
+        document.getElementById('ajouterLivre').addEventListener('click', () => {
+            const nombre = parseInt(document.getElementById('nombreLivres').value);
+            if (nombre > 0) {
+                // Calculer le nombre de livres restants qu'on peut ajouter
+                const livresRestants = 73 - livresCollectes.length;
+                const nombreAajouter = Math.min(nombre, livresRestants); // Limiter à 73 livres au total
+
+                let livresAjoutes = 0;
+                while (livresAjoutes < nombreAajouter) {
+                    let livre;
+                    do {
+                        livre = livresBible[Math.floor(Math.random() * livresBible.length)];
+                    } while (livresCollectes.includes(livre)); // Vérifier que le livre n'est pas déjà dans la liste
+                    livresCollectes.push(livre);
+                    livresAjoutes++;
+                }
+                afficherLivres();
+                document.getElementById('retirerLivre').disabled = false;
+            } else {
+                alert("Le nombre de livres à ajouter est invalide.");
+            }
+        });
+
+        // Retirer un livre de la pile
+        document.getElementById('retirerLivre').addEventListener('click', () => {
+            if (livresCollectes.length > 0) {
+                livresCollectes.pop();
+                afficherLivres();
+                if (livresCollectes.length === 0) {
+                    document.getElementById('message').style.display = 'block';
+                    document.getElementById('recommencer').style.display = 'block';
+                    document.getElementById('ajouterLivre').disabled = true;
+                    document.getElementById('retirerLivre').disabled = true;
+                }
+            }
+        });
+
+        // Recommencer le jeu
+        document.getElementById('recommencer').addEventListener('click', () => {
+            initialiserJeu();
+            document.getElementById('message').style.display = 'none';
+            document.getElementById('recommencer').style.display = 'none';
+            document.getElementById('ajouterLivre').disabled = false;
+            document.getElementById('retirerLivre').disabled = false;
+        });
+
+        // Initialisation initiale
+        initialiserJeu();
+    </script>
+</body>
+</html>
